@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28; //quest: is this the correct compiler version?
+pragma solidity 0.8.18; //quest: is this the correct compiler version?
 
 /*
  * @author not-so-secure-dev
@@ -16,13 +16,14 @@ contract PasswordStore {
 
     error PasswordStore__NotOwner();
 
-/*/////////////////////////////////////////////////*
+    /*/////////////////////////////////////////////////*
             | STATE VARIABLES |
 /*/ ///////////////////////////////////////////////*/
-    address private s_owner;
-    string private s_password
+    address private s_owner; //slot storage 0
+    //@audit the s_password variable is not actually private! This is not a safe place to secure your password
+    string private s_password; //slot storage 1
 
-/*/////////////////////////////////////////////////*
+    /*/////////////////////////////////////////////////*
             | EVENTS |
 /*/ ///////////////////////////////////////////////*/
     event SetNetPassword();
@@ -36,10 +37,10 @@ contract PasswordStore {
      * @param newPassword The new password to set.
      */
 
-     //hey what's this function do? if they did not make it clear
-     //ques: Can a non-owner set the password?
-     //@audit any user can set a password
-     //attack: misssing access control
+    //hey what's this function do? if they did not make it clear
+    //ques: Can a non-owner set the password?
+    //@audit any user can set a password
+    //attack: missing access control
     function setPassword(string memory newPassword) external {
         s_password = newPassword;
         emit SetNetPassword();
@@ -47,7 +48,8 @@ contract PasswordStore {
 
     /*
      * @notice This allows only the owner to retrieve the password.
-     * @param newPassword The new password to set.
+     //@audit there is no newPassword parameter!
+     *@param newPassword The new password to set.
      */
     function getPassword() external view returns (string memory) {
         if (msg.sender != s_owner) {
