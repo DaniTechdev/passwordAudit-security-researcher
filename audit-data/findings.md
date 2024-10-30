@@ -7,9 +7,10 @@
 <!-- ### [S-#] TITLE (Root Cause + Impact) -->
 <!-- ### [S-#] Variables stored in storage on-chain are visible to anyone , no matter the solidity visibility keyword meaning the password is actually not a private pasword -->
 
+### [S-#]
 
 <!-- Shorter form -->
-### [S-#] Storing the password on-chain makess it visible to anyoone and, no longer private
+### [H-1] Storing the password on-chain makess it visible to anyoone and, no longer private
 
 **Description:** All data stored onChain is visible to anyone , and can be read directly from the blockchain. The `PasswordStore::s_passsword` variable is intended to be private variable and only accessed through the `PasswordStore::getPassword` function, which is intended to be only called by the owner of the contract
 
@@ -53,14 +54,23 @@ And get an output of;
 ```
 
 
+
+
+
 **Recommended Mitigation:**  Due to this, the overrall architecture of the contract should rethought. One could encrypt the passsword off-chain, and then store the encrypted password on-chain. This world require a user to rememmber another password off-chain to  decrypt the password. However, you'll also likely want to remove the view function as you would't want the user to accidentally send a transaction with the password that decrypts your password.
 
+    ## Likelyhood and Impact
+        -Impact:HIGH
+        -Likelyhood: High
+        -Severity:HIGH
+
+<!-- ## HIGH
+-Worst offenders -> Least bad
+## Medium
+## Low -->
 
 
-
-
-
-### [S-#] `PasswordStore::setPassword` has no access control, meaning a non-owner could change the password.
+### [H-2] `PasswordStore::setPassword` has no access control, meaning a non-owner could change the password.
 
 **Description:** The `PasswordStore::setPassword` function is set to be an `external` function, however, the natspect of the function overrall purpose of the smart contract is that `This function allows only the owner to set a new password.`
 
@@ -114,30 +124,44 @@ And get an output of;
    }
 ```
 
+    ## Likelyhood and Impact
+    -Impact:HIGH
+    -Likelyhood: High
+    -Severity:HIGH
+
+
+### [I-1] The `PasswordStore::getPassword` napspec indicates a parameter that doesn't exist, causing the napspec to be incorrect.
+
+    **Description:** 
+    ```javascript
+        /*
+        * @notice This allows only the owner to retrieve the password.
+        * @audit There is no newPassword parameter!
+        * @param newPassword The new password to set.
+        */
+        function getPassword() external view returns (string memory) {
+
+    ```
+    The `passwordStore::getPassword` function ssignature is `getPassword()` which the natspec say it should be `getPassword(string)`
+
+    **Impact:**  The napspec is incorrect
+
+
+    **Recommended Mitigation:** Remove the natspec line.
+
+    ```diff
+
+    - * @param newPassword The new password to set.
+    ```
 
 
 
-### [S-#] The `PasswordStore::getPassword` napspec indicates a parameter that doesn't exist, causing the napspec to be incorrect.
+## Likelyhood and Impact
+-Impact:NONE
+-Likelyhood: HIGH
+-Severity:Informational/Gas/Non-crits
 
-**Description:** 
-```javascript
-    /*
-    * @notice This allows only the owner to retrieve the password.
-    * @audit There is no newPassword parameter!
-    * @param newPassword The new password to set.
-    */
-    function getPassword() external view returns (string memory) {
-
-```
-The `passwordStore::getPassword` function ssignature is `getPassword()` which the natspec say it should be `getPassword(string)`
-
-**Impact:**  The napspec is incorrect
+Informational: Hey, this isn't a bug, but you should know ...
 
 
-**Recommended Mitigation:** Remove the natspec line.
-
-```diff
-
-- * @param newPassword The new password to set.
-```
 
